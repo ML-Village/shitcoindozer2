@@ -6,16 +6,21 @@ const MAX_COINS = 100;
 const COIN_POOL_SIZE = 150;
 const INITIAL_COINS = 20; // Number of coins to spawn initially
 
+interface Coin {
+  body: CANNON.Body;
+  mesh: THREE.Mesh;
+  active: boolean;
+}
 
-const CoinDozerGame = () => {
-    const mountRef = useRef(null);
-    const sceneRef = useRef(null);
-    const worldRef = useRef(null);
-    const coinsRef = useRef([]);
-    const coinPoolRef = useRef([]);
-    const [coinCount, setCoinCount] = useState(0);
+const CoinDozerGame: React.FC = () => {
+  const mountRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const worldRef = useRef<CANNON.World | null>(null);
+  const coinsRef = useRef<Coin[]>([]);
+  const coinPoolRef = useRef<Coin[]>([]);
+  const [coinCount, setCoinCount] = useState<number>(0);
 
-  const createCoin = useCallback(() => {
+  const createCoin = useCallback((): Coin => {
     const radius = 0.75;
     const height = 0.2;
 
@@ -41,7 +46,7 @@ const CoinDozerGame = () => {
     }
   }, [createCoin]);
 
-  const getInactiveCoin = useCallback(() => {
+  const getInactiveCoin = useCallback((): Coin | undefined => {
     return coinPoolRef.current.find(coin => !coin.active);
   }, []);
 
@@ -49,7 +54,7 @@ const CoinDozerGame = () => {
     if (coinCount >= MAX_COINS) return;
 
     const coin = getInactiveCoin();
-    if (!coin) return;
+    if (!coin || !worldRef.current || !sceneRef.current) return;
 
     coin.active = true;
     coin.body.position.set(Math.random() * 6.5 - 4, 5, -4);
@@ -70,18 +75,16 @@ const CoinDozerGame = () => {
 
     for (let i = 0; i < INITIAL_COINS; i++) {
       const coin = getInactiveCoin();
-      if (!coin) break; // Stop if we run out of inactive coins
+      if (!coin || !worldRef.current || !sceneRef.current) break;
 
-      // Random position on the platform
       const x = Math.random() * (platformWidth - 2 * margin) - (platformWidth / 2 - margin);
       const z = Math.random() * (platformDepth - 2 * margin) - (platformDepth / 2 - margin);
       
       coin.active = true;
-      coin.body.position.set(x, 0.05, z); // Slightly above the platform
+      coin.body.position.set(x, 0.05, z);
       coin.body.velocity.set(0, 0, 0);
       coin.body.angularVelocity.set(0, 0, 0);
       
-      // Random rotation around Y-axis
       const randomRotation = Math.random() * Math.PI * 2;
       coin.body.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), randomRotation);
 
@@ -93,8 +96,10 @@ const CoinDozerGame = () => {
   }, [getInactiveCoin]);
 
   useEffect(() => {
-    let camera, renderer;
-    let pusherBody, pusherMesh;
+    let camera: THREE.PerspectiveCamera;
+    let renderer: THREE.WebGLRenderer;
+    let pusherBody: CANNON.Body;
+    let pusherMesh: THREE.Mesh;
 
     const init = () => {
       // Three.js setup
@@ -102,13 +107,12 @@ const CoinDozerGame = () => {
       camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
       renderer = new THREE.WebGLRenderer();
       renderer.setSize(window.innerWidth, window.innerHeight);
-      mountRef.current.appendChild(renderer.domElement);
+      if (mountRef.current) {
+        mountRef.current.appendChild(renderer.domElement);
+      }
 
       camera.position.set(0, 15, 12);
-      // Create a look-at point at the center of the game area
       const lookAtPoint = new THREE.Vector3(0, 5, 0);
-
-      // Make the camera look at this point
       camera.lookAt(lookAtPoint);
 
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -134,7 +138,7 @@ const CoinDozerGame = () => {
       const platformGeometry = new THREE.BoxGeometry(7, 0.5, 10);
       const platformMaterial = new THREE.MeshPhongMaterial({ color: 0x999999 });
       const platformMesh = new THREE.Mesh(platformGeometry, platformMaterial);
-      platformMesh.position.copy(platformBody.position);
+      platformMesh.position.copy(platformBody.position as unknown as THREE.Vector3);
       sceneRef.current.add(platformMesh);
 
       // Create pusher (dozer)
@@ -150,7 +154,7 @@ const CoinDozerGame = () => {
       const pusherGeometry = new THREE.BoxGeometry(7, 1, 2);
       const pusherMaterial = new THREE.MeshPhongMaterial({ color: 0x555555 });
       pusherMesh = new THREE.Mesh(pusherGeometry, pusherMaterial);
-      pusherMesh.position.copy(pusherBody.position);
+      pusherMesh.position.copy(pusherBody.position as unknown as THREE.Vector3);
       sceneRef.current.add(pusherMesh);
 
       // Create walls
@@ -169,8 +173,8 @@ const CoinDozerGame = () => {
       const wallMaterial3js = new THREE.MeshPhongMaterial({ color: 0x8888ff, transparent: true, opacity: 0 });
       const leftWallMesh = new THREE.Mesh(wallGeometry, wallMaterial3js);
       const rightWallMesh = new THREE.Mesh(wallGeometry, wallMaterial3js);
-      leftWallMesh.position.copy(leftWallBody.position);
-      rightWallMesh.position.copy(rightWallBody.position);
+      leftWallMesh.position.copy(leftWallBody.position as unknown as THREE.Vector3);
+      rightWallMesh.position.copy(rightWallBody.position as unknown as THREE.Vector3);
       sceneRef.current.add(leftWallMesh);
       sceneRef.current.add(rightWallMesh);
 
@@ -182,43 +186,40 @@ const CoinDozerGame = () => {
 
       const backWallGeometry = new THREE.BoxGeometry(10, 2, 0.5);
       const backWallMesh = new THREE.Mesh(backWallGeometry, wallMaterial3js);
-      backWallMesh.position.copy(backWallBody.position);
+      backWallMesh.position.copy(backWallBody.position as unknown as THREE.Vector3);
       sceneRef.current.add(backWallMesh);
 
       initCoinPool();
       spawnInitialCoins(); 
     };
 
-    const animate = (time) => {
-        requestAnimationFrame(animate);
+    const animate = (time: number) => {
+      requestAnimationFrame(animate);
   
+      if (worldRef.current && sceneRef.current) {
         worldRef.current.step(1 / 60);
   
         // Update pusher
         const amplitude = 1.5;
         const frequency = 0.005;
         pusherBody.position.z = -4.5 + Math.sin(time * frequency) * amplitude;
-        pusherMesh.position.copy(pusherBody.position);
+        pusherMesh.position.copy(pusherBody.position as unknown as THREE.Vector3);
   
         // Update active coins
         for (let i = coinsRef.current.length - 1; i >= 0; i--) {
           const coin = coinsRef.current[i];
           
-          // Simplified physics for distant or slow-moving coins
           const distanceFromCenter = coin.body.position.distanceTo(new CANNON.Vec3(0, 0, 0));
           const speed = coin.body.velocity.length();
           
           if (distanceFromCenter > 8 || speed < 0.1) {
-            // Apply simplified physics
             coin.body.position.y += coin.body.velocity.y / 60;
-            coin.body.velocity.y -= 9.82 / 60; // Simplified gravity
+            coin.body.velocity.y -= 9.82 / 60;
           } else {
-            // Full physics simulation
-            coin.mesh.position.copy(coin.body.position);
-            coin.mesh.quaternion.copy(coin.body.quaternion);
+            coin.mesh.position.copy(coin.body.position as unknown as THREE.Vector3);
+            coin.mesh.quaternion.copy(coin.body.quaternion as unknown as THREE.Quaternion);
           }
   
-          // Remove coins that fall off the platform
           if (coin.body.position.y < -2 || coin.body.position.z > 5) {
             worldRef.current.removeBody(coin.body);
             sceneRef.current.remove(coin.mesh);
@@ -229,14 +230,17 @@ const CoinDozerGame = () => {
         }
   
         renderer.render(sceneRef.current, camera);
-      };
+      }
+    };
 
     init();
     animate(0);
 
     // Cleanup function
     return () => {
-      mountRef.current.removeChild(renderer.domElement);
+      if (mountRef.current && renderer.domElement) {
+        mountRef.current.removeChild(renderer.domElement);
+      }
     };
   }, [initCoinPool, spawnInitialCoins]);
 
@@ -244,12 +248,12 @@ const CoinDozerGame = () => {
     <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
       <div ref={mountRef} />
       <div style={{
-        alignItems: 'center', // This centers children vertically in the container
-        justifyContent: 'center', // This centers children horizontally in the container
+        alignItems: 'center',
+        justifyContent: 'center',
         position: 'absolute',
         bottom: '2px',
-        left: 0, // Ensure it spans full width if you want to center horizontally
-        right: 0, // Ensure it spans full width if you want to center horizontally
+        left: 0,
+        right: 0,
         background: 'rgba(255, 255, 255, 0.7)',
         padding: '10px',
         borderRadius: '5px'

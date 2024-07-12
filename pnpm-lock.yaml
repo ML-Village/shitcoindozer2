@@ -27,6 +27,9 @@ importers:
         specifier: ^2.17.3
         version: 2.17.3(bufferutil@4.0.8)(typescript@5.5.3)(utf-8-validate@5.0.10)
     devDependencies:
+      '@types/cannon':
+        specifier: ^0.1.12
+        version: 0.1.12
       '@types/react':
         specifier: ^18.3.3
         version: 18.3.3
@@ -872,6 +875,9 @@ packages:
 
   '@types/bn.js@5.1.5':
     resolution: {integrity: sha512-V46N0zwKRF5Q00AZ6hWtN0T8gGmDUaUzLWQvHFo5yThtVwK/VCenFY3wXVbOvNfajEpsTfQM4IN9k/d6gUVX3A==}
+
+  '@types/cannon@0.1.12':
+    resolution: {integrity: sha512-YzVDrjM+H1IH4pnw23nDFDXaWEyvYIq/Tmp75wg9CmtIiBJd3GtXzo5UXp+bAgk76fom9RhSlQIzHT8haF5VuQ==}
 
   '@types/create-hash@1.2.2':
     resolution: {integrity: sha512-Fg8/kfMJObbETFU/Tn+Y0jieYewryLrbKwLCEIwPyklZZVY2qB+64KFjhplGSw+cseZosfFXctXO+PyIYD8iZQ==}
@@ -3540,6 +3546,8 @@ snapshots:
   '@types/bn.js@5.1.5':
     dependencies:
       '@types/node': 20.14.10
+
+  '@types/cannon@0.1.12': {}
 
   '@types/create-hash@1.2.2':
     dependencies:
