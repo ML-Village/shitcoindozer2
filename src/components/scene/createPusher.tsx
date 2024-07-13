@@ -3,7 +3,7 @@ import * as CANNON from 'cannon-es';
 
 export const createPusher = (scene: THREE.Scene, world: CANNON.World, imageUrl: string) => {
   // Create pusher body
-  const pusherShape = new CANNON.Box(new CANNON.Vec3(4, 12, 0.5));
+  const pusherShape = new CANNON.Box(new CANNON.Vec3(4, 6, 0.5));
   const pusherBody = new CANNON.Body({ 
     mass: 0,
     material: new CANNON.Material({ friction: 0.5, restitution: 0.3 })
@@ -13,7 +13,7 @@ export const createPusher = (scene: THREE.Scene, world: CANNON.World, imageUrl: 
   world.addBody(pusherBody);
 
   // Create pusher mesh (invisible)
-  const pusherGeometry = new THREE.BoxGeometry(7, 6, 1);
+  const pusherGeometry = new THREE.BoxGeometry(7, 3, 1);
   const pusherMaterial = new THREE.MeshBasicMaterial({ 
     color: 0x555555, 
     visible: false, // Make the pusher mesh invisible

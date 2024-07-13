@@ -6,3 +6,10 @@ export interface Coin {
   mesh: THREE.Mesh;
   active: boolean;
 }
+
+export interface SelectedCoin {
+    id: string;
+    name: string;
+    balance: number;
+    image: string;
+}

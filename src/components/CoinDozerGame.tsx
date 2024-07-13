@@ -9,7 +9,6 @@ import {
   spawnInitialCoins 
 } from './coin';
 
-const MAX_COINS = 100;
 const COIN_POOL_SIZE = 150;
 const INITIAL_COINS = 20;
 
@@ -35,7 +34,7 @@ const CoinDozerGame: React.FC = () => {
   const pusherRef = useRef<{ body: CANNON.Body; mesh: THREE.Mesh; imageMesh: THREE.Mesh | null }>({ body: new CANNON.Body(), mesh: new THREE.Mesh(), imageMesh: null });
 
   const handleSpawnCoin = () => {
-    spawnCoin(coinPoolRef, coinsRef, worldRef, sceneRef, setCoinCount, MAX_COINS);
+    spawnCoin(coinPoolRef, coinsRef, worldRef, sceneRef, setCoinCount, selectedCoin);
   };
 
   useEffect(() => {
@@ -70,7 +69,7 @@ const CoinDozerGame: React.FC = () => {
         worldRef.current.step(1 / 60);
     
         // Update pusher and image
-        const amplitude = 2;
+        const amplitude = 0.5;
         const frequency = 0.005;
         pusherRef.current.body.position.z = -4.5 + Math.sin(time * frequency) * amplitude;
         pusherRef.current.mesh.position.copy(pusherRef.current.body.position as unknown as THREE.Vector3);
