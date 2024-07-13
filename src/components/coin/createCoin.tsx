@@ -15,8 +15,16 @@ export const createCoin = (): Coin => {
   body.linearDamping = 0.3;
   body.angularDamping = 0.5;
 
+  const textureLoader = new THREE.TextureLoader();
+  const texture = textureLoader.load('DozerCoin.png');
+
+  // Create the material with the texture
+  const material = new THREE.MeshPhongMaterial({ map: texture });
+
+  // Create the geometry for the coin
   const geometry = new THREE.CylinderGeometry(radius, radius, height, 32);
-  const material = new THREE.MeshPhongMaterial({ color: 0xffff00 });
+
+  // Create the mesh with the geometry and textured material
   const mesh = new THREE.Mesh(geometry, material);
 
   return { body, mesh, active: false };

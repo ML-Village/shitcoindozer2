@@ -233,7 +233,7 @@ const BackgroundVideo: React.FC = () => (
 );
 
 const BackgroundImage: React.FC = () => (
-  <div className="absolute top-[-80px] left-5 right-5 bottom-10 bg-cover bg-center" style={{ backgroundImage: 'url("/bgmockup.png")', transform: 'scale(1.1)', zIndex: 0 }} />
+  <div className="absolute top-[-80px] left-5 right-5 bottom-20 bg-cover bg-center" style={{ backgroundImage: 'url("/bgmockup.png")', transform: 'scale(1.1)', zIndex: 0 }} />
 );
 
 const ContentMount: React.FC<{ mountRef: React.RefObject<HTMLDivElement> }> = ({ mountRef }) => (
