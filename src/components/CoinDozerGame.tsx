@@ -45,6 +45,7 @@ const CoinDozerGame: React.FC = () => {
 
   const handleSpawnCoin = useCallback(() => {
     if (dropperRef.current) {
+      console.log(coinCount);
       dropperRef.current.dropCoin(() => {
         const dropperPosition = dropperRef.current?.body.position;
         spawnCoin(coinPoolRef, coinsRef, worldRef, sceneRef, setCoinCount, selectedCoin, dropperPosition);
@@ -80,7 +81,6 @@ const CoinDozerGame: React.FC = () => {
     };
 
     const animate = (() => {
-      let rotationCount = 0;
       const defaultAmplitude = 1;
       const specialAmplitude = 4;
       const frequency = 0.005;

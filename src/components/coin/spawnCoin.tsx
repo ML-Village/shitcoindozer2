@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
-import { MutableRefObject } from 'react';
 import { Coin, SelectedCoin } from './types';
 import { createSpecialCoin } from './createCoin';
 
@@ -15,6 +14,8 @@ export const spawnCoin = (
 ) => {
   const coin = createSpecialCoin(selectedCoin.image);
   if (!coin || !worldRef.current || !sceneRef.current) return;
+
+  console.log(coinPoolRef.current);
 
   coin.active = true;
   if (dropperPosition) {
