@@ -14,7 +14,7 @@ export const spawnCoin = (
 ) => {
   console.log(coinPoolRef);
   const coin = createSpecialCoin(selectedCoin.image);
-  coin.body.position.set(Math.random() * 6.5 - 4, 10, -4);
+  coin.body.position.set(Math.random() * 6.5 - 4, 4, -4);
   coin.body.velocity.set(0, 0, 0);
   coin.body.angularVelocity.set(0, 0, 0);
   coin.body.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), Math.PI / 2);

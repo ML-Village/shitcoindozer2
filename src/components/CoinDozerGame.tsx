@@ -8,6 +8,7 @@ import {
   spawnCoin, 
   spawnInitialCoins 
 } from './coin';
+import WalletButton from './viem/WalletButton';
 
 const COIN_POOL_SIZE = 150;
 const INITIAL_COINS = 20;
@@ -32,6 +33,7 @@ const CoinDozerGame: React.FC = () => {
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const [selectedCoin, setSelectedCoin] = useState(coins[0]);
   const pusherRef = useRef<{ body: CANNON.Body; mesh: THREE.Mesh; imageMesh: THREE.Mesh | null }>({ body: new CANNON.Body(), mesh: new THREE.Mesh(), imageMesh: null });
+  const [showMatrix, setShowMatrix] = useState(false);
 
   const handleSpawnCoin = () => {
     spawnCoin(coinPoolRef, coinsRef, worldRef, sceneRef, setCoinCount, selectedCoin);
@@ -149,6 +151,65 @@ const CoinDozerGame: React.FC = () => {
         height: '100vh',
         overflow: 'hidden'
       }}>
+        <div>
+      <button
+        onClick={() => setShowMatrix(!showMatrix)}
+        style={{
+          position: 'absolute',
+          top: '0',
+          left: '0',
+          zIndex: 5, // Ensure the button is above the translucent box
+        }}
+      >
+        ➡️
+      </button>
+      {showMatrix && (
+        <div style={{
+          position: 'absolute',
+          top: '0',
+          left: '0',
+          backgroundColor: 'rgba(128, 128, 128, 0.5)', // Grey and translucent
+          padding: '10px',
+          zIndex: 4, // Ensure it's above other elements but below the button
+        }}>
+          <p style={{ fontFamily: 'monospace', margin: '0' }}>Contract State</p>
+          <p style={{ fontFamily: 'monospace', margin: '0' }}>0 1 0 1 0</p>
+          <p style={{ fontFamily: 'monospace', margin: '0' }}>1 0 1 0 1</p>
+          <p style={{ fontFamily: 'monospace', margin: '0' }}>0 1 0 1 0</p>
+          <p style={{ fontFamily: 'monospace', margin: '0' }}>1 0 1 0 1</p>
+          <p style={{ fontFamily: 'monospace', margin: '0' }}>0 1 0 1 0</p>
+        </div>
+      )}
+    </div>
+    <div
+    style={
+      {
+        position: 'absolute',
+        top: '10px',
+        left: '40%', 
+        justifyContent: 'center',
+        zIndex: 11,
+        padding: '8px 12px',
+        fontSize: '14px',
+        color: 'white',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
+      }
+    }>
+      NEAR AA
+    </div>
+        <div
+        style={{
+          position: 'absolute',
+          top: '50px',
+          right: '10px',
+          zIndex: 11,
+        }}
+      >
+        <WalletButton />
+      </div>
+
       <video
         autoPlay
         loop

@@ -19,7 +19,7 @@ export const initScene = (containerSize: { width: number; height: number }) => {
   initLights(scene);
 
   const world = new CANNON.World();
-  world.gravity.set(0, -9, 0);
+  world.gravity.set(0, -18, 0);
 
   createPlatform(scene, world);
   const pusher = createPusher(scene, world, '/Sweeper.png');
