@@ -19,6 +19,9 @@ const CoinDozerGame: React.FC = () => {
   const coinsRef = useRef<Coin[]>([]);
   const coinPoolRef = useRef<Coin[]>([]);
   const [coinCount, setCoinCount] = useState<number>(0);
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
 
   const createCoin = useCallback((): Coin => {
     const radius = 0.75;
@@ -96,24 +99,32 @@ const CoinDozerGame: React.FC = () => {
   }, [getInactiveCoin]);
 
   useEffect(() => {
-    let camera: THREE.PerspectiveCamera;
-    let renderer: THREE.WebGLRenderer;
     let pusherBody: CANNON.Body;
     let pusherMesh: THREE.Mesh;
 
+    const updateContainerSize = () => {
+      if (mountRef.current) {
+        const { clientWidth, clientHeight } = mountRef.current;
+        setContainerSize({ width: clientWidth, height: clientHeight });
+      }
+    };
+
     const init = () => {
+      updateContainerSize();
+
       // Three.js setup
       sceneRef.current = new THREE.Scene();
-      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      renderer = new THREE.WebGLRenderer();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      cameraRef.current = new THREE.PerspectiveCamera(75, containerSize.width / containerSize.height, 0.1, 1000);
+      rendererRef.current = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      rendererRef.current.setSize(containerSize.width, containerSize.height);
+      rendererRef.current.setPixelRatio(window.devicePixelRatio);
       if (mountRef.current) {
-        mountRef.current.appendChild(renderer.domElement);
+        mountRef.current.appendChild(rendererRef.current.domElement);
       }
 
-      camera.position.set(0, 15, 12);
+      cameraRef.current.position.set(0, 15, 12);
       const lookAtPoint = new THREE.Vector3(0, 5, 0);
-      camera.lookAt(lookAtPoint);
+      cameraRef.current.lookAt(lookAtPoint);
 
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
       sceneRef.current.add(ambientLight);
@@ -196,7 +207,7 @@ const CoinDozerGame: React.FC = () => {
     const animate = (time: number) => {
       requestAnimationFrame(animate);
   
-      if (worldRef.current && sceneRef.current) {
+      if (worldRef.current && sceneRef.current && cameraRef.current && rendererRef.current) {
         worldRef.current.step(1 / 60);
   
         // Update pusher
@@ -229,34 +240,67 @@ const CoinDozerGame: React.FC = () => {
           }
         }
   
-        renderer.render(sceneRef.current, camera);
+        rendererRef.current.render(sceneRef.current, cameraRef.current);
       }
     };
 
     init();
     animate(0);
 
+    window.addEventListener('resize', updateContainerSize);
+
     // Cleanup function
     return () => {
-      if (mountRef.current && renderer.domElement) {
-        mountRef.current.removeChild(renderer.domElement);
+      if (mountRef.current && rendererRef.current?.domElement) {
+        mountRef.current.removeChild(rendererRef.current.domElement);
       }
+      window.removeEventListener('resize', updateContainerSize);
     };
   }, [initCoinPool, spawnInitialCoins]);
 
+  useEffect(() => {
+    if (cameraRef.current && rendererRef.current && containerSize.width && containerSize.height) {
+      cameraRef.current.aspect = containerSize.width / containerSize.height;
+      cameraRef.current.updateProjectionMatrix();
+      rendererRef.current.setSize(containerSize.width, containerSize.height);
+    }
+  }, [containerSize]);
+
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
-      <div ref={mountRef} />
+    <div style={{ 
+      position: 'relative', 
+      width: '100%',
+      height: '100vh',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      overflow: 'hidden',
+      backgroundColor: '#000'
+    }}>
       <div style={{
-        alignItems: 'center',
-        justifyContent: 'center',
+        position: 'absolute',
+        width: '100%',
+        height: '100%',
+        backgroundImage: 'url("/bgmockup.png")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        transform: 'scale(1.1)',
+      }} />
+      <div ref={mountRef} style={{ 
+        position: 'relative',
+        width: '100%',
+        maxWidth: '375px',
+        height: '100%',
+        maxHeight: '667px',
+      }} />
+      <div style={{
         position: 'absolute',
         bottom: '2px',
-        left: 0,
-        right: 0,
+        left: '50%',
+        transform: 'translateX(-50%)',
         background: 'rgba(255, 255, 255, 0.7)',
         padding: '10px',
-        borderRadius: '5px'
+        borderRadius: '5px',
       }}>
         <button onClick={spawnCoin} style={{
           padding: '10px 20px',
