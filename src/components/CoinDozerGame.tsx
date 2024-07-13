@@ -278,7 +278,7 @@ const CoinDozerGame: React.FC = () => {
       <div style={{
         position: 'relative', 
         width: '100%',
-        maxWidth: '375px',
+        //maxWidth: '400px',
         height: '100vh',
         overflow: 'hidden'
       }}>
