@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import { initScene } from './scene/initScene';
@@ -36,12 +36,22 @@ const CoinDozerGame: React.FC = () => {
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const [selectedCoin, setSelectedCoin] = useState(coins[0]);
   const pusherRef = useRef<{ body: CANNON.Body; mesh: THREE.Mesh; imageMesh: THREE.Mesh | null }>({ body: new CANNON.Body(), mesh: new THREE.Mesh(), imageMesh: null });
-  const [showMatrix, setShowMatrix] = useState(false);
+  const dropperRef = useRef<{ body: CANNON.Body; mesh: THREE.Mesh; updatePosition: (time: number) => void; dropCoin: (callback: () => void) => void }>({ 
+    body: new CANNON.Body(), 
+    mesh: new THREE.Mesh(), 
+    updatePosition: () => {}, 
+    dropCoin: () => {} 
+  });  const [showMatrix, setShowMatrix] = useState(false);
 
-  const handleSpawnCoin = () => {
-    spawnCoin(coinPoolRef, coinsRef, worldRef, sceneRef, setCoinCount, selectedCoin);
-    coinThrowSound.play().catch(error => console.error("Error playing the sound:", error));
-  };
+  const handleSpawnCoin = useCallback(() => {
+    if (dropperRef.current) {
+      dropperRef.current.dropCoin(() => {
+        const dropperPosition = dropperRef.current?.body.position;
+        spawnCoin(coinPoolRef, coinsRef, worldRef, sceneRef, setCoinCount, selectedCoin, dropperPosition);
+      });
+      coinThrowSound.play().catch(error => console.error("Error playing the sound:", error));
+    }
+  }, [selectedCoin]);
 
   useEffect(() => {
     const updateContainerSize = () => {
@@ -53,12 +63,13 @@ const CoinDozerGame: React.FC = () => {
 
     const init = () => {
       updateContainerSize();
-      const { scene, camera, renderer, world, pusher } = initScene(containerSize);
+      const { scene, camera, renderer, world, pusher, dropper } = initScene(containerSize);
       sceneRef.current = scene;
       cameraRef.current = camera;
       rendererRef.current = renderer;
       worldRef.current = world;
       pusherRef.current = pusher;
+      dropperRef.current = dropper;
 
       if (mountRef.current) {
         mountRef.current.appendChild(renderer.domElement);
@@ -68,58 +79,72 @@ const CoinDozerGame: React.FC = () => {
       spawnInitialCoins(coinPoolRef, coinsRef, worldRef, sceneRef, setCoinCount, INITIAL_COINS);
     };
 
-    const animate = (time: number) => {
-      requestAnimationFrame(animate);
-
-      console.log(coinCount);
+    const animate = (() => {
+      let rotationCount = 0;
+      const defaultAmplitude = 1;
+      const specialAmplitude = 4;
+      const frequency = 0.005;
     
-      if (worldRef.current && sceneRef.current && cameraRef.current && rendererRef.current) {
-        worldRef.current.step(1 / 60);
+      return (time: number) => {
+        requestAnimationFrame(animate);
     
-        // Update pusher and image
-        const amplitude = 1;
-        const frequency = 0.005;
-        pusherRef.current.body.position.z = -4.5 + Math.sin(time * frequency) * amplitude;
-        pusherRef.current.mesh.position.copy(pusherRef.current.body.position as unknown as THREE.Vector3);
-        
-        if (pusherRef.current.imageMesh) {
-          // Update image position relative to pusher
-          pusherRef.current.imageMesh.position.copy(pusherRef.current.mesh.position);
-          pusherRef.current.imageMesh.position.y += 3; // Adjust this value to move the image up or down
-          pusherRef.current.imageMesh.position.z += 0; // Adjust this value to move the image closer to or further from the pusher
+        if (worldRef.current && sceneRef.current && cameraRef.current && rendererRef.current) {
+          worldRef.current.step(1 / 60);
     
-          // Maintain the rotation
-          pusherRef.current.imageMesh.rotation.x = -Math.PI / 2 + 1.3;
-        }
+          // Determine the current rotation
+          const currentRotation = Math.floor(time * frequency / (2 * Math.PI));
     
-        // Update active coins
-        for (let i = coinsRef.current.length - 1; i >= 0; i--) {
-          const coin = coinsRef.current[i];
+          // Check if it's the 10th rotation (or a multiple of 10)
+          const isSpecialRotation = currentRotation % 5 === 4; // Use 9 because rotations start at 0
+    
+          // Set amplitude based on rotation
+          const amplitude = isSpecialRotation ? specialAmplitude : defaultAmplitude;
+    
+          // Update pusher and image
+          pusherRef.current.body.position.z = -4.5 + Math.sin(time * frequency) * amplitude;
+          pusherRef.current.mesh.position.copy(pusherRef.current.body.position as unknown as THREE.Vector3);
           
-          const distanceFromCenter = coin.body.position.distanceTo(new CANNON.Vec3(0, 0, 0));
-          const speed = coin.body.velocity.length();
-          
-          if (distanceFromCenter > 8 || speed < 0.1) {
-            coin.body.position.y += coin.body.velocity.y / 60;
-            coin.body.velocity.y -= 9.82 / 60;
-          } else {
-            coin.mesh.position.copy(coin.body.position as unknown as THREE.Vector3);
-            coin.mesh.quaternion.copy(coin.body.quaternion as unknown as THREE.Quaternion);
-          }
+          dropperRef.current.updatePosition(time);
     
-          if (coin.body.position.y < -2 || coin.body.position.z > 7) {
-            worldRef.current.removeBody(coin.body);
-            sceneRef.current.remove(coin.mesh);
-            coin.active = false;
-            coinsRef.current.splice(i, 1);
-            setCoinCount(prevCount => prevCount - 1);
-            coinDropSound.play().catch(error => console.error("Error playing the sound:", error));
+          if (pusherRef.current.imageMesh) {
+            // Update image position relative to pusher
+            pusherRef.current.imageMesh.position.copy(pusherRef.current.mesh.position);
+            pusherRef.current.imageMesh.position.y += 3; // Adjust this value to move the image up or down
+            pusherRef.current.imageMesh.position.z += 0; // Adjust this value to move the image closer to or further from the pusher
+      
+            // Maintain the rotation
+            pusherRef.current.imageMesh.rotation.x = -Math.PI / 2 + 1.3;
           }
+      
+          // Update active coins
+          for (let i = coinsRef.current.length - 1; i >= 0; i--) {
+            const coin = coinsRef.current[i];
+            
+            const distanceFromCenter = coin.body.position.distanceTo(new CANNON.Vec3(0, 0, 0));
+            const speed = coin.body.velocity.length();
+            
+            if (distanceFromCenter > 8 || speed < 0.1) {
+              coin.body.position.y += coin.body.velocity.y / 60;
+              coin.body.velocity.y -= 9.82 / 60;
+            } else {
+              coin.mesh.position.copy(coin.body.position as unknown as THREE.Vector3);
+              coin.mesh.quaternion.copy(coin.body.quaternion as unknown as THREE.Quaternion);
+            }
+      
+            if (coin.body.position.y < -2 || coin.body.position.z > 7) {
+              worldRef.current.removeBody(coin.body);
+              sceneRef.current.remove(coin.mesh);
+              coin.active = false;
+              coinsRef.current.splice(i, 1);
+              setCoinCount(prevCount => prevCount - 1);
+              coinDropSound.play().catch(error => console.error("Error playing the sound:", error));
+            }
+          }
+      
+          rendererRef.current.render(sceneRef.current, cameraRef.current);
         }
-    
-        rendererRef.current.render(sceneRef.current, cameraRef.current);
-      }
-    };
+      };
+    })();
 
     init();
     animate(0);

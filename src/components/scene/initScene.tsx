@@ -4,6 +4,7 @@ import { initLights } from './initLights';
 import { createPlatform } from './createPlatform';
 import { createPusher } from './createPusher';
 import { createWalls } from './createWalls';
+import { createDropper } from './createDropper';
 
 export const initScene = (containerSize: { width: number; height: number }) => {
   const scene = new THREE.Scene();
@@ -24,6 +25,6 @@ export const initScene = (containerSize: { width: number; height: number }) => {
   createPlatform(scene, world);
   const pusher = createPusher(scene, world, '/Sweeper.png');
   createWalls(scene, world);
-
-  return { scene, camera, renderer, world, pusher };
+  const dropper = createDropper(scene, world);
+  return { scene, camera, renderer, world, pusher, dropper };
 };

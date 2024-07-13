@@ -5,27 +5,33 @@ import { Coin, SelectedCoin } from './types';
 import { createSpecialCoin } from './createCoin';
 
 export const spawnCoin = (
-  coinPoolRef: MutableRefObject<Coin[]>,
-  coinsRef: MutableRefObject<Coin[]>,
-  worldRef: MutableRefObject<CANNON.World | null>,
-  sceneRef: MutableRefObject<THREE.Scene | null>,
-  setCoinCount: (update: (prevCount: number) => number) => void,
-  selectedCoin: SelectedCoin
+  coinPoolRef: React.MutableRefObject<Coin[]>,
+  coinsRef: React.MutableRefObject<Coin[]>,
+  worldRef: React.MutableRefObject<CANNON.World | null>,
+  sceneRef: React.MutableRefObject<THREE.Scene | null>,
+  setCoinCount: React.Dispatch<React.SetStateAction<number>>,
+  selectedCoin: SelectedCoin,
+  dropperPosition?: CANNON.Vec3
 ) => {
-  console.log(coinPoolRef);
   const coin = createSpecialCoin(selectedCoin.image);
-  coin.body.position.set(Math.random() * 6.5 - 4, 4, -4);
+  if (!coin || !worldRef.current || !sceneRef.current) return;
+
+  coin.active = true;
+  if (dropperPosition) {
+    coin.body.position.set(
+      dropperPosition.x,
+      dropperPosition.y - 1, // Spawn slightly below the dropper
+      dropperPosition.z + 0.05
+    );
+  } else {
+    coin.body.position.set(0, 10, -2); // Default position if dropper position is not provided
+  }
   coin.body.velocity.set(0, 0, 0);
   coin.body.angularVelocity.set(0, 0, 0);
   coin.body.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), Math.PI / 2);
 
-  if(worldRef.current) {
-    worldRef.current.addBody(coin.body);
-  }
-  if (sceneRef.current) {
-    sceneRef.current.add(coin.mesh);
-  }
-  coin.mesh.renderOrder = 5; // Adjust this value as needed
+  worldRef.current.addBody(coin.body);
+  sceneRef.current.add(coin.mesh);
   coinsRef.current.push(coin);
   setCoinCount(prevCount => prevCount + 1);
 };
