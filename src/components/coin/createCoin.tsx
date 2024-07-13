@@ -3,8 +3,8 @@ import * as CANNON from 'cannon-es';
 import { Coin } from './types';
 
 export const createCoin = (): Coin => {
-  const radius = 0.6;
-  const height = 0.1;
+  const radius = 1;
+  const height = 0.33;
 
   const shape = new CANNON.Cylinder(radius, radius, height, 20);
   const body = new CANNON.Body({
@@ -23,8 +23,8 @@ export const createCoin = (): Coin => {
 };
 
 export const createSpecialCoin = (imageURL: string): Coin => {
-  const radius = 0.6;
-  const height = 0.1;
+  const radius = 1;
+  const height = 0.33;
 
   const shape = new CANNON.Cylinder(radius, radius, height, 20);
   const body = new CANNON.Body({

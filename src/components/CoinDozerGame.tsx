@@ -9,9 +9,12 @@ import {
   spawnInitialCoins 
 } from './coin';
 import WalletButton from './viem/WalletButton';
+import BackgroundMusic from './scene/BackgroundMusic';
 
 const COIN_POOL_SIZE = 150;
 const INITIAL_COINS = 20;
+const coinDropSound = new Audio('coindrop.mp3');
+const coinThrowSound = new Audio('cointhrow.mp3');
 
 const coins = [
   { id: 'doge', name: 'Dogecoin', balance: 1000, image: '/dogecoin.png' },
@@ -37,6 +40,7 @@ const CoinDozerGame: React.FC = () => {
 
   const handleSpawnCoin = () => {
     spawnCoin(coinPoolRef, coinsRef, worldRef, sceneRef, setCoinCount, selectedCoin);
+    coinThrowSound.play().catch(error => console.error("Error playing the sound:", error));
   };
 
   useEffect(() => {
@@ -46,7 +50,7 @@ const CoinDozerGame: React.FC = () => {
         setContainerSize({ width: clientWidth, height: clientHeight });
       }
     };
-    console.log(coinCount);
+
     const init = () => {
       updateContainerSize();
       const { scene, camera, renderer, world, pusher } = initScene(containerSize);
@@ -66,6 +70,8 @@ const CoinDozerGame: React.FC = () => {
 
     const animate = (time: number) => {
       requestAnimationFrame(animate);
+
+      console.log(coinCount);
     
       if (worldRef.current && sceneRef.current && cameraRef.current && rendererRef.current) {
         worldRef.current.step(1 / 60);
@@ -101,12 +107,13 @@ const CoinDozerGame: React.FC = () => {
             coin.mesh.quaternion.copy(coin.body.quaternion as unknown as THREE.Quaternion);
           }
     
-          if (coin.body.position.y < -2 || coin.body.position.z > 5) {
+          if (coin.body.position.y < -2 || coin.body.position.z > 7) {
             worldRef.current.removeBody(coin.body);
             sceneRef.current.remove(coin.mesh);
             coin.active = false;
             coinsRef.current.splice(i, 1);
             setCoinCount(prevCount => prevCount - 1);
+            coinDropSound.play().catch(error => console.error("Error playing the sound:", error));
           }
         }
     
@@ -136,198 +143,157 @@ const CoinDozerGame: React.FC = () => {
   }, [containerSize]);
 
   return (
-    <div style={{ 
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: '100%',
-      height: '100vh',
-      backgroundColor: '#000'
-    }}>
-      <div style={{
-        position: 'relative', 
-        width: '100%',
-        maxWidth: '400px',
-        height: '100vh',
-        overflow: 'hidden'
-      }}>
-        <div>
-      <button
-        onClick={() => setShowMatrix(!showMatrix)}
-        style={{
-          position: 'absolute',
-          top: '0',
-          left: '0',
-          zIndex: 5, // Ensure the button is above the translucent box
-        }}
-      >
-        ➡️
-      </button>
-      {showMatrix && (
-        <div style={{
-          position: 'absolute',
-          top: '0',
-          left: '0',
-          backgroundColor: 'rgba(128, 128, 128, 0.5)', // Grey and translucent
-          padding: '10px',
-          zIndex: 4, // Ensure it's above other elements but below the button
-        }}>
-          <p style={{ fontFamily: 'monospace', margin: '0' }}>Contract State</p>
-          <p style={{ fontFamily: 'monospace', margin: '0' }}>0 1 0 1 0</p>
-          <p style={{ fontFamily: 'monospace', margin: '0' }}>1 0 1 0 1</p>
-          <p style={{ fontFamily: 'monospace', margin: '0' }}>0 1 0 1 0</p>
-          <p style={{ fontFamily: 'monospace', margin: '0' }}>1 0 1 0 1</p>
-          <p style={{ fontFamily: 'monospace', margin: '0' }}>0 1 0 1 0</p>
-        </div>
-      )}
-    </div>
-    <div
-    style={
-      {
-        position: 'absolute',
-        top: '10px',
-        left: '40%', 
-        justifyContent: 'center',
-        zIndex: 11,
-        padding: '8px 12px',
-        fontSize: '14px',
-        color: 'white',
-        border: 'none',
-        borderRadius: '5px',
-        cursor: 'pointer',
-      }
-    }>
-      NEAR AA
-    </div>
-        <div
-        style={{
-          position: 'absolute',
-          top: '50px',
-          right: '10px',
-          zIndex: 11,
-        }}
-      >
-        <WalletButton />
-      </div>
-
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        style={{
-          position: 'absolute',
-          top: '0px', // Adjust this value to shift the video up
-          left: '50%',
-          height: '440px', // Let the height adjust automatically
-          transform: 'translateX(-50%) scale(1)', // Center horizontally and scale down slightly
-          objectFit: 'cover',
-          zIndex: 1,
-        }}
-      >
-        <source src='/dance.mp4' type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-      <div style={{
-        position: 'absolute',
-        top: '-40px',
-        left: 0,
-        right: 0,
-        bottom: '40px',
-        backgroundImage: 'url("/bgmockup.png")',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        transform: 'scale(1.1)',
-        zIndex: 2,
-      }} />
-      
-        <div ref={mountRef} style={{ 
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: '80px', // Leave space for the bottom bar
-          maxHeight: 'calc(100% - 80px)', // Ensure it doesn't overlap with the bar
-          zIndex: 3,
-        }} />
-        <div style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          width: '100%',
-          height: '80px',
-          background: 'rgba(255, 255, 255, 0.9)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 10px',
-          zIndex: 10, // Ensure the bar is above other elements
-        }}>
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            overflowX: 'auto',
-            width: 'calc(100% - 140px)', // Adjust based on the width of the right side content
-            paddingBottom: '10px', // To show scrollbar
-          }}>
-            {coins.map((coin) => (
-              <div
-                key={coin.id}
-                onClick={() => setSelectedCoin(coin)}
-                style={{
-                  marginRight: '10px',
-                  cursor: 'pointer',
-                  position: 'relative',
-                  flexShrink: 0, // Prevent coins from shrinking
-                }}
-              >
-                <img
-                  src={coin.image}
-                  alt={coin.name}
-                  style={{
-                    width: '50px',
-                    height: '50px',
-                    borderRadius: '50%',
-                    border: selectedCoin.id === coin.id ? '3px solid #4CAF50' : 'none',
-                  }}
-                />
-              </div>
-            ))}
-          </div>
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center',
-            marginLeft: '10px',
-            flexShrink: 0, // Prevent this section from shrinking
-          }}>
-            <div style={{ marginRight: '10px', textAlign: 'right' }}>
-              <div style={{ fontSize: '12px' }}>{selectedCoin.name}</div>
-              <div style={{ fontSize: '12px' }}>{selectedCoin.balance} coins</div>
-            </div>
-            <button 
-              onClick={handleSpawnCoin}
-              style={{
-                background: '#4CAF50',
-                color: 'white',
-                border: 'none',
-                borderRadius: '50%',
-                width: '50px',
-                height: '50px',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                cursor: 'pointer',
-                fontSize: '24px',
-                fontWeight: 'bold',
-              }}
-            >
-              +
-            </button>
-          </div>
-        </div>
-      </div>
+    <div className="flex justify-center items-center w-full h-screen bg-black">
+      <MainContent 
+        showMatrix={showMatrix} 
+        setShowMatrix={setShowMatrix} 
+        selectedCoin={selectedCoin}
+        setSelectedCoin={setSelectedCoin}
+        coins={coins}
+        handleSpawnCoin={handleSpawnCoin}
+        mountRef={mountRef}
+      />
     </div>
   );
 };
+
+const MainContent: React.FC<{
+  showMatrix: boolean;
+  setShowMatrix: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedCoin: typeof coins[0];
+  setSelectedCoin: React.Dispatch<React.SetStateAction<typeof coins[0]>>;
+  coins: typeof coins;
+  handleSpawnCoin: () => void;
+  mountRef: React.RefObject<HTMLDivElement>;
+}> = ({ showMatrix, setShowMatrix, selectedCoin, setSelectedCoin, coins, handleSpawnCoin, mountRef }) => {
+  return (
+    <div className="relative w-full max-w-md h-screen overflow-hidden">
+      <div>
+        <ToggleMatrixButton showMatrix={showMatrix} setShowMatrix={setShowMatrix} />
+        <MatrixOverlay showMatrix={showMatrix} />
+      </div>
+      <Header />
+      <WalletButtonWrapper />
+      <BackgroundMusic src="background.mp3" />
+      <BackgroundVideo />
+      <BackgroundImage />
+      <ContentMount mountRef={mountRef} />
+      <BottomBar 
+        coins={coins} 
+        selectedCoin={selectedCoin} 
+        setSelectedCoin={setSelectedCoin} 
+        handleSpawnCoin={handleSpawnCoin} 
+      />
+    </div>
+  );
+};
+
+const ToggleMatrixButton: React.FC<{
+  showMatrix: boolean;
+  setShowMatrix: React.Dispatch<React.SetStateAction<boolean>>;
+}> = ({ showMatrix, setShowMatrix }) => (
+  <button 
+    onClick={() => setShowMatrix(!showMatrix)} 
+    className="absolute top-0 left-0 z-50"
+  >
+    ➡️
+  </button>
+);
+
+const MatrixOverlay: React.FC<{ showMatrix: boolean }> = ({ showMatrix }) => (
+  showMatrix && (
+    <div className="absolute top-10 left-0 bg-gray-500 bg-opacity-50 p-2 z-50">
+      <p className="font-mono m-0">Contract State</p>
+      <p className="font-mono m-0">0 1 0 1 0</p>
+      <p className="font-mono m-0">1 0 1 0 1</p>
+      <p className="font-mono m-0">0 1 0 1 0</p>
+      <p className="font-mono m-0">1 0 1 0 1</p>
+      <p className="font-mono m-0">0 1 0 1 0</p>
+    </div>
+  )
+);
+
+const Header: React.FC = () => (
+  <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-50 py-2 px-3 text-white text-sm bg-opacity-90 rounded cursor-pointer">
+    NEAR AA
+  </div>
+);
+
+const WalletButtonWrapper: React.FC = () => (
+  <div className="absolute top-12 right-2 z-50">
+    <WalletButton />
+  </div>
+);
+
+const BackgroundVideo: React.FC = () => (
+  <video autoPlay loop muted playsInline className="absolute top-0 left-1/2 transform -translate-x-1/2 h-[440px] object-cover z-1">
+    <source src='/dance.mp4' type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
+);
+
+const BackgroundImage: React.FC = () => (
+  <div className="absolute top-[-80px] left-5 right-5 bottom-10 bg-cover bg-center" style={{ backgroundImage: 'url("/bgmockup.png")', transform: 'scale(1.1)', zIndex: 0 }} />
+);
+
+const ContentMount: React.FC<{ mountRef: React.RefObject<HTMLDivElement> }> = ({ mountRef }) => (
+  <div ref={mountRef} className="absolute top-0 left-0 right-0 bottom-20 max-h-[calc(100%-80px)] z-3" />
+);
+
+const BottomBar: React.FC<{
+  coins: typeof coins;
+  selectedCoin: typeof coins[0];
+  setSelectedCoin: React.Dispatch<React.SetStateAction<typeof coins[0]>>;
+  handleSpawnCoin: () => void;
+}> = ({ coins, selectedCoin, setSelectedCoin, handleSpawnCoin }) => (
+  <div className="absolute bottom-0 left-0 w-full h-20 bg-white bg-opacity-90 flex items-center justify-between px-2 z-10">
+    <div className="flex items-center overflow-x-auto w-[calc(100%-140px)] pb-2">
+      {coins.map((coin) => (
+        <CoinItem 
+          key={coin.id} 
+          coin={coin} 
+          selectedCoin={selectedCoin} 
+          setSelectedCoin={setSelectedCoin} 
+        />
+      ))}
+    </div>
+    <CoinInfoAndButton 
+      selectedCoin={selectedCoin} 
+      handleSpawnCoin={handleSpawnCoin} 
+    />
+  </div>
+);
+
+const CoinItem: React.FC<{
+  coin: typeof coins[0];
+  selectedCoin: typeof coins[0];
+  setSelectedCoin: React.Dispatch<React.SetStateAction<typeof coins[0]>>;
+}> = ({ coin, selectedCoin, setSelectedCoin }) => (
+  <div onClick={() => setSelectedCoin(coin)} className="mr-2 cursor-pointer relative flex-shrink-0">
+    <img 
+      src={coin.image} 
+      alt={coin.name} 
+      className={`w-12 h-12 rounded-full ${selectedCoin.id === coin.id ? 'border-3 border-green-500' : ''}`}
+    />
+  </div>
+);
+
+const CoinInfoAndButton: React.FC<{
+  selectedCoin: typeof coins[0];
+  handleSpawnCoin: () => void;
+}> = ({ selectedCoin, handleSpawnCoin }) => (
+  <div className="flex items-center ml-2 flex-shrink-0">
+    <div className="mr-2 text-right">
+      <div className="text-xs">{selectedCoin.name}</div>
+      <div className="text-xs">{selectedCoin.balance} coins</div>
+    </div>
+    <button 
+      onClick={handleSpawnCoin} 
+      className="bg-green-500 text-white border-none rounded-full w-12 h-12 flex justify-center items-center cursor-pointer text-2xl font-bold"
+    >
+      +
+    </button>
+  </div>
+);
 
 export default CoinDozerGame;
