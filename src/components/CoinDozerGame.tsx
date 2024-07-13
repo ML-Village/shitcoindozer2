@@ -45,7 +45,7 @@ const CoinDozerGame: React.FC = () => {
         setContainerSize({ width: clientWidth, height: clientHeight });
       }
     };
-
+    console.log(coinCount);
     const init = () => {
       updateContainerSize();
       const { scene, camera, renderer, world, pusher } = initScene(containerSize);
@@ -61,24 +61,6 @@ const CoinDozerGame: React.FC = () => {
 
       initCoinPool(coinPoolRef, COIN_POOL_SIZE);
       spawnInitialCoins(coinPoolRef, coinsRef, worldRef, sceneRef, setCoinCount, INITIAL_COINS);
-
-      // Add pusher image
-      const loader = new THREE.TextureLoader();
-      loader.load('/path/to/pusher-image.png', (texture) => {
-        const imageGeometry = new THREE.PlaneGeometry(7, 2);
-        const imageMaterial = new THREE.MeshBasicMaterial({ 
-          map: texture, 
-          transparent: true,
-          side: THREE.DoubleSide
-        });
-        const imageMesh = new THREE.Mesh(imageGeometry, imageMaterial);
-        imageMesh.position.copy(pusher.mesh.position);
-        imageMesh.position.z += 1.01;
-        imageMesh.rotation.y = Math.PI;
-        imageMesh.receiveShadow = false;
-        scene.add(imageMesh);
-        pusherRef.current.imageMesh = imageMesh;
-      });
     };
 
     const animate = (time: number) => {
@@ -88,14 +70,19 @@ const CoinDozerGame: React.FC = () => {
         worldRef.current.step(1 / 60);
     
         // Update pusher and image
-        const amplitude = 1.5;
+        const amplitude = 0.4;
         const frequency = 0.005;
         pusherRef.current.body.position.z = -4.5 + Math.sin(time * frequency) * amplitude;
         pusherRef.current.mesh.position.copy(pusherRef.current.body.position as unknown as THREE.Vector3);
         
         if (pusherRef.current.imageMesh) {
+          // Update image position relative to pusher
           pusherRef.current.imageMesh.position.copy(pusherRef.current.mesh.position);
-          pusherRef.current.imageMesh.position.z += 1.01;
+          pusherRef.current.imageMesh.position.y += 0; // Adjust this value to move the image up or down
+          pusherRef.current.imageMesh.position.z += -5; // Adjust this value to move the image closer to or further from the pusher
+    
+          // Maintain the rotation
+          pusherRef.current.imageMesh.rotation.x = -Math.PI / 2 + 1.3;
         }
     
         // Update active coins
@@ -119,7 +106,6 @@ const CoinDozerGame: React.FC = () => {
             coin.active = false;
             coinsRef.current.splice(i, 1);
             setCoinCount(prevCount => prevCount - 1);
-            console.log(coinCount)
           }
         }
     
@@ -164,17 +150,37 @@ const CoinDozerGame: React.FC = () => {
         height: '100vh',
         overflow: 'hidden'
       }}>
-        <div style={{
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        style={{
           position: 'absolute',
-          top: '-40px', // Shift up by half the height of the bottom bar
-          left: 0,
-          right: 0,
-          bottom: '40px', // Leave space for the bottom bar
-          backgroundImage: 'url("/bgmockup.png")',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          transform: 'scale(1.1)',
-        }} />
+          top: '-10px', // Adjust this value to shift the video up
+          left: '50%',
+          height: '400px', // Let the height adjust automatically
+          transform: 'translateX(-50%) scale(1)', // Center horizontally and scale down slightly
+          objectFit: 'cover',
+          zIndex: 1,
+        }}
+      >
+        <source src='/dance.mp4' type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+      <div style={{
+        position: 'absolute',
+        top: '-40px',
+        left: 0,
+        right: 0,
+        bottom: '40px',
+        backgroundImage: 'url("/bgmockup.png")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        transform: 'scale(1.1)',
+        zIndex: 2,
+      }} />
+      
         <div ref={mountRef} style={{ 
           position: 'absolute',
           top: 0,
@@ -182,6 +188,7 @@ const CoinDozerGame: React.FC = () => {
           right: 0,
           bottom: '80px', // Leave space for the bottom bar
           maxHeight: 'calc(100% - 80px)', // Ensure it doesn't overlap with the bar
+          zIndex: 3,
         }} />
         <div style={{
           position: 'absolute',

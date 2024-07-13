@@ -2,18 +2,22 @@ import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 
 export const createPusher = (scene: THREE.Scene, world: CANNON.World, imageUrl: string) => {
-  // Create pusher body and mesh as before
-  const pusherShape = new CANNON.Box(new CANNON.Vec3(3.5, 1, 1));
+  // Create pusher body
+  const pusherShape = new CANNON.Box(new CANNON.Vec3(4, 1, 1));
   const pusherBody = new CANNON.Body({ 
     mass: 0,
     material: new CANNON.Material({ friction: 0.5, restitution: 0.3 })
   });
   pusherBody.addShape(pusherShape);
-  pusherBody.position.set(0, 0.01, -4.5);
+  pusherBody.position.set(0, 0, -4.5);
   world.addBody(pusherBody);
 
-  const pusherGeometry = new THREE.BoxGeometry(7, 1, 2);
-  const pusherMaterial = new THREE.MeshPhongMaterial({ color: 0x555555, transparent: true, opacity: 0 });
+  // Create pusher mesh (invisible)
+  const pusherGeometry = new THREE.BoxGeometry(7, 14, 3);
+  const pusherMaterial = new THREE.MeshPhongMaterial({ 
+    color: 0x555555, 
+    visible: false // Make the pusher mesh invisible
+  });
   const pusherMesh = new THREE.Mesh(pusherGeometry, pusherMaterial);
   pusherMesh.position.copy(pusherBody.position as unknown as THREE.Vector3);
   scene.add(pusherMesh);
@@ -21,18 +25,31 @@ export const createPusher = (scene: THREE.Scene, world: CANNON.World, imageUrl: 
   // Create image plane
   const loader = new THREE.TextureLoader();
   const texture = loader.load(imageUrl);
-  const imageGeometry = new THREE.PlaneGeometry(7, 2); // Adjust size as needed
+  texture.encoding = THREE.sRGBEncoding;
+
+  const imageAspect = texture.image ? texture.image.width / texture.image.height : 1;
+  const imageWidth = 9;
+  const imageHeight = imageWidth / imageAspect - 0.5;
+
+  const imageGeometry = new THREE.PlaneGeometry(imageWidth, imageHeight);
   const imageMaterial = new THREE.MeshBasicMaterial({ 
     map: texture, 
     transparent: true,
-    side: THREE.DoubleSide
+    side: THREE.FrontSide,
+    depthTest: false,
+    depthWrite: false
   });
   const imageMesh = new THREE.Mesh(imageGeometry, imageMaterial);
 
-  // Position the image in front of the pusher
+  // Position and orient the image
   imageMesh.position.copy(pusherMesh.position);
-  imageMesh.position.z += 1.01; // Slightly in front of the pusher
-  imageMesh.rotation.y = Math.PI; // Face the image towards the camera
+  imageMesh.position.y += 0.1; // Adjust this value to move the image up or down
+  imageMesh.position.z += 0; // Adjust this value to move the image closer to or further from the pusher
+
+  // Rotate to face the camera
+  imageMesh.rotation.x = -Math.PI / 2 + 1.3;
+
+  imageMesh.renderOrder = 0;
 
   // Add the image to the scene
   scene.add(imageMesh);

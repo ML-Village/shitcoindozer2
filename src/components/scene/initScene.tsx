@@ -13,7 +13,7 @@ export const initScene = (containerSize: { width: number; height: number }) => {
   renderer.setPixelRatio(window.devicePixelRatio);
 
   camera.position.set(0, 15 * 0.7 , 12* 0.7 );
-  const lookAtPoint = new THREE.Vector3(0, 4, 0);
+  const lookAtPoint = new THREE.Vector3(0, 5, 0);
   camera.lookAt(lookAtPoint);
 
   initLights(scene);
