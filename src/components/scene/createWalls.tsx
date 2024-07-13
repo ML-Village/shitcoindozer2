@@ -22,20 +22,8 @@ export const createWalls = (scene: THREE.Scene, world: CANNON.World) => {
   scene.add(leftWallMesh);
   scene.add(rightWallMesh);
 
-  const backWallShape = new CANNON.Box(new CANNON.Vec3(5, 1, 0.25));
-  const backWallBody = new CANNON.Body({ mass: 0, material: wallMaterial });
-  backWallBody.addShape(backWallShape);
-  backWallBody.position.set(0, 1, -5.25);
-  world.addBody(backWallBody);
-
-  const backWallGeometry = new THREE.BoxGeometry(10, 2, 0.5);
-  const backWallMesh = new THREE.Mesh(backWallGeometry, wallMaterial3js);
-  backWallMesh.position.copy(backWallBody.position as unknown as THREE.Vector3);
-  scene.add(backWallMesh);
-
   return {
     leftWall: { body: leftWallBody, mesh: leftWallMesh },
     rightWall: { body: rightWallBody, mesh: rightWallMesh },
-    backWall: { body: backWallBody, mesh: backWallMesh }
   };
 };

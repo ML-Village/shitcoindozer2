@@ -70,7 +70,7 @@ const CoinDozerGame: React.FC = () => {
         worldRef.current.step(1 / 60);
     
         // Update pusher and image
-        const amplitude = 0.4;
+        const amplitude = 2;
         const frequency = 0.005;
         pusherRef.current.body.position.z = -4.5 + Math.sin(time * frequency) * amplitude;
         pusherRef.current.mesh.position.copy(pusherRef.current.body.position as unknown as THREE.Vector3);
@@ -78,8 +78,8 @@ const CoinDozerGame: React.FC = () => {
         if (pusherRef.current.imageMesh) {
           // Update image position relative to pusher
           pusherRef.current.imageMesh.position.copy(pusherRef.current.mesh.position);
-          pusherRef.current.imageMesh.position.y += 0; // Adjust this value to move the image up or down
-          pusherRef.current.imageMesh.position.z += -5; // Adjust this value to move the image closer to or further from the pusher
+          pusherRef.current.imageMesh.position.y += 3; // Adjust this value to move the image up or down
+          pusherRef.current.imageMesh.position.z += 0; // Adjust this value to move the image closer to or further from the pusher
     
           // Maintain the rotation
           pusherRef.current.imageMesh.rotation.x = -Math.PI / 2 + 1.3;
@@ -157,9 +157,9 @@ const CoinDozerGame: React.FC = () => {
         playsInline
         style={{
           position: 'absolute',
-          top: '-10px', // Adjust this value to shift the video up
+          top: '0px', // Adjust this value to shift the video up
           left: '50%',
-          height: '400px', // Let the height adjust automatically
+          height: '440px', // Let the height adjust automatically
           transform: 'translateX(-50%) scale(1)', // Center horizontally and scale down slightly
           objectFit: 'cover',
           zIndex: 1,

@@ -18,13 +18,14 @@ export const spawnCoin = (
   if (!coin || !worldRef.current || !sceneRef.current) return;
 
   coin.active = true;
-  coin.body.position.set(Math.random() * 6.5 - 4, 5, -4);
+  coin.body.position.set(Math.random() * 6.5 - 4, 10, -4);
   coin.body.velocity.set(0, 0, 0);
   coin.body.angularVelocity.set(0, 0, 0);
   coin.body.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), Math.PI / 2);
 
   worldRef.current.addBody(coin.body);
   sceneRef.current.add(coin.mesh);
+  coin.mesh.renderOrder = 5; // Adjust this value as needed
   coinsRef.current.push(coin);
   setCoinCount(prevCount => prevCount + 1);
 };

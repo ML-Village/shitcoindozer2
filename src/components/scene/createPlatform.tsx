@@ -11,7 +11,7 @@ export const createPlatform = (scene: THREE.Scene, world: CANNON.World) => {
   platformBody.position.set(0, -0.25, 0);
   world.addBody(platformBody);
 
-  const platformGeometry = new THREE.BoxGeometry(7, 0.5, 8);
+  const platformGeometry = new THREE.BoxGeometry(7, 0, 8);
   const platformMaterial = new THREE.MeshPhongMaterial({ color: 0x999999, transparent: true, opacity: 0 });
   const platformMesh = new THREE.Mesh(platformGeometry, platformMaterial);
   platformMesh.position.copy(platformBody.position as unknown as THREE.Vector3);
