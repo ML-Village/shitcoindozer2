@@ -122,8 +122,8 @@ const CoinDozerGame: React.FC = () => {
         mountRef.current.appendChild(rendererRef.current.domElement);
       }
 
-      cameraRef.current.position.set(0, 15, 12);
-      const lookAtPoint = new THREE.Vector3(0, 5, 0);
+      cameraRef.current.position.set(0, 15*0.75, 12*0.75);
+      const lookAtPoint = new THREE.Vector3(0, 3, 0);
       cameraRef.current.lookAt(lookAtPoint);
 
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -268,49 +268,55 @@ const CoinDozerGame: React.FC = () => {
 
   return (
     <div style={{ 
-      position: 'relative', 
-      width: '100%',
-      height: '100vh',
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      overflow: 'hidden',
+      width: '100%',
+      height: '100vh',
       backgroundColor: '#000'
     }}>
       <div style={{
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-        backgroundImage: 'url("/bgmockup.png")',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        transform: 'scale(1.1)',
-      }} />
-      <div ref={mountRef} style={{ 
-        position: 'relative',
+        position: 'relative', 
         width: '100%',
         maxWidth: '375px',
-        height: '100%',
-        maxHeight: '667px',
-      }} />
-      <div style={{
-        position: 'absolute',
-        bottom: '2px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        background: 'rgba(255, 255, 255, 0.7)',
-        padding: '10px',
-        borderRadius: '5px',
+        height: '100vh',
+        overflow: 'hidden'
       }}>
-        <button onClick={spawnCoin} style={{
-          padding: '10px 20px',
-          fontSize: '16px',
-          cursor: 'pointer'
+        <div style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          backgroundImage: 'url("/bgmockup.png")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          transform: 'scale(1.1)',
+        }} />
+        <div ref={mountRef} style={{ 
+          position: 'relative',
+          width: '100%',
+          height: '100%',
+          maxHeight: '667px',
+        }} />
+        <div style={{
+          position: 'absolute',
+          bottom: '2px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'rgba(255, 255, 255, 0.7)',
+          padding: '10px',
+          borderRadius: '5px',
         }}>
-          Spawn Coin
-        </button>
+          <button onClick={spawnCoin} style={{
+            padding: '10px 20px',
+            fontSize: '16px',
+            cursor: 'pointer'
+          }}>
+            Spawn Coin
+          </button>
+        </div>
       </div>
     </div>
+    
   );
 };
 
