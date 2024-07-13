@@ -12,7 +12,7 @@ export const initScene = (containerSize: { width: number; height: number }) => {
   renderer.setSize(containerSize.width, containerSize.height);
   renderer.setPixelRatio(window.devicePixelRatio);
 
-  camera.position.set(0, 15 * 0.8 , 12* 0.8 );
+  camera.position.set(0, 15 * 0.7 , 12* 0.7 );
   const lookAtPoint = new THREE.Vector3(0, 4, 0);
   camera.lookAt(lookAtPoint);
 
@@ -21,8 +21,8 @@ export const initScene = (containerSize: { width: number; height: number }) => {
   const world = new CANNON.World();
   world.gravity.set(0, -17, 0);
 
-  const platform = createPlatform(scene, world);
-  const pusher = createPusher(scene, world);
+  createPlatform(scene, world);
+  const pusher = createPusher(scene, world, '/Sweeper.png');
   createWalls(scene, world);
 
   return { scene, camera, renderer, world, pusher };

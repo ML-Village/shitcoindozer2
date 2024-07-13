@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import { initScene } from './scene/initScene';
@@ -11,7 +11,15 @@ import {
 
 const MAX_COINS = 100;
 const COIN_POOL_SIZE = 150;
-const INITIAL_COINS = 20; // Number of coins to spawn initially
+const INITIAL_COINS = 20;
+
+const coins = [
+  { id: 'doge', name: 'Dogecoin', balance: 1000, image: '/dogecoin.png' },
+  { id: 'shib', name: 'Shiba Inu', balance: 5000, image: '/coin:shiba.png' },
+  { id: 'safemoon', name: 'SafeMoon', balance: 10000, image: '/coin:safemoon.png' },
+  { id: 'solana', name: 'Solana', balance: 50000, image: '/solana.png' },
+  { id: 'pepe', name: 'Pepe', balance: 100000, image: '/pepecoin.png' },
+];
 
 const CoinDozerGame: React.FC = () => {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -23,15 +31,14 @@ const CoinDozerGame: React.FC = () => {
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const [selectedCoin, setSelectedCoin] = useState(coins[0]);
+  const pusherRef = useRef<{ body: CANNON.Body; mesh: THREE.Mesh; imageMesh: THREE.Mesh | null }>({ body: new CANNON.Body(), mesh: new THREE.Mesh(), imageMesh: null });
 
   const handleSpawnCoin = () => {
     spawnCoin(coinPoolRef, coinsRef, worldRef, sceneRef, setCoinCount, MAX_COINS);
   };
 
   useEffect(() => {
-    let pusherBody: CANNON.Body;
-    let pusherMesh: THREE.Mesh;
-
     const updateContainerSize = () => {
       if (mountRef.current) {
         const { clientWidth, clientHeight } = mountRef.current;
@@ -46,8 +53,7 @@ const CoinDozerGame: React.FC = () => {
       cameraRef.current = camera;
       rendererRef.current = renderer;
       worldRef.current = world;
-      pusherBody = pusher.body;
-      pusherMesh = pusher.mesh;
+      pusherRef.current = pusher;
 
       if (mountRef.current) {
         mountRef.current.appendChild(renderer.domElement);
@@ -55,20 +61,43 @@ const CoinDozerGame: React.FC = () => {
 
       initCoinPool(coinPoolRef, COIN_POOL_SIZE);
       spawnInitialCoins(coinPoolRef, coinsRef, worldRef, sceneRef, setCoinCount, INITIAL_COINS);
+
+      // Add pusher image
+      const loader = new THREE.TextureLoader();
+      loader.load('/path/to/pusher-image.png', (texture) => {
+        const imageGeometry = new THREE.PlaneGeometry(7, 2);
+        const imageMaterial = new THREE.MeshBasicMaterial({ 
+          map: texture, 
+          transparent: true,
+          side: THREE.DoubleSide
+        });
+        const imageMesh = new THREE.Mesh(imageGeometry, imageMaterial);
+        imageMesh.position.copy(pusher.mesh.position);
+        imageMesh.position.z += 1.01;
+        imageMesh.rotation.y = Math.PI;
+        imageMesh.receiveShadow = false;
+        scene.add(imageMesh);
+        pusherRef.current.imageMesh = imageMesh;
+      });
     };
 
     const animate = (time: number) => {
       requestAnimationFrame(animate);
-  
+    
       if (worldRef.current && sceneRef.current && cameraRef.current && rendererRef.current) {
         worldRef.current.step(1 / 60);
-  
-        // Update pusher
+    
+        // Update pusher and image
         const amplitude = 1.5;
         const frequency = 0.005;
-        pusherBody.position.z = -4.5 + Math.sin(time * frequency) * amplitude;
-        pusherMesh.position.copy(pusherBody.position as unknown as THREE.Vector3);
-  
+        pusherRef.current.body.position.z = -4.5 + Math.sin(time * frequency) * amplitude;
+        pusherRef.current.mesh.position.copy(pusherRef.current.body.position as unknown as THREE.Vector3);
+        
+        if (pusherRef.current.imageMesh) {
+          pusherRef.current.imageMesh.position.copy(pusherRef.current.mesh.position);
+          pusherRef.current.imageMesh.position.z += 1.01;
+        }
+    
         // Update active coins
         for (let i = coinsRef.current.length - 1; i >= 0; i--) {
           const coin = coinsRef.current[i];
@@ -83,16 +112,17 @@ const CoinDozerGame: React.FC = () => {
             coin.mesh.position.copy(coin.body.position as unknown as THREE.Vector3);
             coin.mesh.quaternion.copy(coin.body.quaternion as unknown as THREE.Quaternion);
           }
-  
+    
           if (coin.body.position.y < -2 || coin.body.position.z > 5) {
             worldRef.current.removeBody(coin.body);
             sceneRef.current.remove(coin.mesh);
             coin.active = false;
             coinsRef.current.splice(i, 1);
             setCoinCount(prevCount => prevCount - 1);
+            console.log(coinCount)
           }
         }
-  
+    
         rendererRef.current.render(sceneRef.current, cameraRef.current);
       }
     };
@@ -102,14 +132,13 @@ const CoinDozerGame: React.FC = () => {
 
     window.addEventListener('resize', updateContainerSize);
 
-    // Cleanup function
     return () => {
       if (mountRef.current && rendererRef.current?.domElement) {
         mountRef.current.removeChild(rendererRef.current.domElement);
       }
       window.removeEventListener('resize', updateContainerSize);
     };
-  }, [initCoinPool, spawnInitialCoins]);
+  }, []);
 
   useEffect(() => {
     if (cameraRef.current && rendererRef.current && containerSize.width && containerSize.height) {
@@ -137,39 +166,100 @@ const CoinDozerGame: React.FC = () => {
       }}>
         <div style={{
           position: 'absolute',
-          width: '100%',
-          height: '100%',
+          top: '-40px', // Shift up by half the height of the bottom bar
+          left: 0,
+          right: 0,
+          bottom: '40px', // Leave space for the bottom bar
           backgroundImage: 'url("/bgmockup.png")',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           transform: 'scale(1.1)',
         }} />
         <div ref={mountRef} style={{ 
-          position: 'relative',
-          width: '100%',
-          height: '100%',
-          maxHeight: '1000px',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: '80px', // Leave space for the bottom bar
+          maxHeight: 'calc(100% - 80px)', // Ensure it doesn't overlap with the bar
         }} />
         <div style={{
           position: 'absolute',
-          bottom: '2px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          background: 'rgba(255, 255, 255, 0.7)',
-          padding: '10px',
-          borderRadius: '0px',
+          bottom: 0,
+          left: 0,
+          width: '100%',
+          height: '80px',
+          background: 'rgba(255, 255, 255, 0.9)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 10px',
+          zIndex: 10, // Ensure the bar is above other elements
         }}>
-          <button onClick={handleSpawnCoin} style={{
-            padding: '5px 10px',
-            fontSize: '16px',
-            cursor: 'pointer'
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            overflowX: 'auto',
+            width: 'calc(100% - 140px)', // Adjust based on the width of the right side content
+            paddingBottom: '10px', // To show scrollbar
           }}>
-            Spawn Coin
-          </button>
+            {coins.map((coin) => (
+              <div
+                key={coin.id}
+                onClick={() => setSelectedCoin(coin)}
+                style={{
+                  marginRight: '10px',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  flexShrink: 0, // Prevent coins from shrinking
+                }}
+              >
+                <img
+                  src={coin.image}
+                  alt={coin.name}
+                  style={{
+                    width: '50px',
+                    height: '50px',
+                    borderRadius: '50%',
+                    border: selectedCoin.id === coin.id ? '3px solid #4CAF50' : 'none',
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center',
+            marginLeft: '10px',
+            flexShrink: 0, // Prevent this section from shrinking
+          }}>
+            <div style={{ marginRight: '10px', textAlign: 'right' }}>
+              <div style={{ fontSize: '12px' }}>{selectedCoin.name}</div>
+              <div style={{ fontSize: '12px' }}>{selectedCoin.balance} coins</div>
+            </div>
+            <button 
+              onClick={handleSpawnCoin}
+              style={{
+                background: '#4CAF50',
+                color: 'white',
+                border: 'none',
+                borderRadius: '50%',
+                width: '50px',
+                height: '50px',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                cursor: 'pointer',
+                fontSize: '24px',
+                fontWeight: 'bold',
+              }}
+            >
+              +
+            </button>
+          </div>
         </div>
       </div>
     </div>
-    
   );
 };
 
