@@ -69,7 +69,7 @@ const CoinDozerGame: React.FC = () => {
         worldRef.current.step(1 / 60);
     
         // Update pusher and image
-        const amplitude = 0.5;
+        const amplitude = 3;
         const frequency = 0.005;
         pusherRef.current.body.position.z = -4.5 + Math.sin(time * frequency) * amplitude;
         pusherRef.current.mesh.position.copy(pusherRef.current.body.position as unknown as THREE.Vector3);

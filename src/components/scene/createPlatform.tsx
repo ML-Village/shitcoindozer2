@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 
 export const createPlatform = (scene: THREE.Scene, world: CANNON.World) => {
-  const platformShape = new CANNON.Box(new CANNON.Vec3(14, 0.25, 8));
+  const platformShape = new CANNON.Box(new CANNON.Vec3(14, 0.25, 4));
   const platformBody = new CANNON.Body({ 
     mass: 0,
     material: new CANNON.Material({ friction: 0.3, restitution: 0.3 })
