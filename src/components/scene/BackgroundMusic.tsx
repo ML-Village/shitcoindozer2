@@ -32,6 +32,7 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({ src }) => {
     <div>
       <audio ref={audioRef} src={src} />
       <button
+        className={`${isPlaying ? 'bg-[#ff4444]' : 'bg-[#4CAF50]/80'}`}
         onClick={toggleMusic}
         style={{
           position: 'absolute',
@@ -40,7 +41,6 @@ const BackgroundMusic: React.FC<BackgroundMusicProps> = ({ src }) => {
           zIndex: 11,
           padding: '8px 12px',
           fontSize: '14px',
-          backgroundColor: isPlaying ? '#ff4444' : '#4CAF50',
           color: 'white',
           border: 'none',
           borderRadius: '5px',

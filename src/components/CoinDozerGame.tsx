@@ -8,7 +8,8 @@ import {
   spawnCoin, 
   spawnInitialCoins 
 } from './coin';
-import WalletButton from './viem/WalletButton';
+//import WalletButton from './viem/WalletButton';
+import WalletButton from './wallet/WalletButton';
 import BackgroundMusic from './scene/BackgroundMusic';
 
 const COIN_POOL_SIZE = 150;
@@ -193,13 +194,28 @@ const MainContent: React.FC<{
 }> = ({ showMatrix, setShowMatrix, selectedCoin, setSelectedCoin, coins, handleSpawnCoin, mountRef }) => {
   return (
     <div className="relative w-full max-w-md h-screen overflow-hidden">
-      <div>
+      {/* <div>
         <ToggleMatrixButton showMatrix={showMatrix} setShowMatrix={setShowMatrix} />
         <MatrixOverlay showMatrix={showMatrix} />
-      </div>
-      <Header />
-      <WalletButtonWrapper />
-      <BackgroundMusic src="background.mp3" />
+      </div> */}
+      <nav className="z-10 absolute
+      bg-transparent py-4 w-full h-[4em]
+      flex justify-start items-center px-4
+      ">
+        <div>
+          <ToggleMatrixButton showMatrix={showMatrix} setShowMatrix={setShowMatrix} />
+          <MatrixOverlay showMatrix={showMatrix} />
+        </div>
+        <BackgroundMusic src="background.mp3" />
+        <WalletButton />
+        <button className="h-full py-5 px-2
+        border rounded-lg bg-white/50
+        flex items-center justify-center
+        ">
+          NEAR AA
+        </button>
+      </nav>
+      
       <BackgroundVideo />
       <BackgroundImage />
       <ContentMount mountRef={mountRef} />
@@ -238,17 +254,8 @@ const MatrixOverlay: React.FC<{ showMatrix: boolean }> = ({ showMatrix }) => (
   )
 );
 
-const Header: React.FC = () => (
-  <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-50 py-2 px-3 text-white text-sm bg-opacity-90 rounded cursor-pointer">
-    NEAR AA
-  </div>
-);
 
-const WalletButtonWrapper: React.FC = () => (
-  <div className="absolute top-12 right-2 z-50">
-    <WalletButton />
-  </div>
-);
+
 
 const BackgroundVideo: React.FC = () => (
   <video autoPlay loop muted playsInline className="absolute top-0 left-1/2 transform -translate-x-1/2 h-[440px] object-cover z-1">

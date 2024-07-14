@@ -36,11 +36,15 @@ export default function WalletButton() {
     <>
       {/* Render the Connect Wallet button */}
       <button 
-        className="px-8 py-2 rounded-md bg-[#a9afb5] flex flex-row items-center justify-center border border-[#1e2124] hover:border hover:border-indigo-600 shadow-md shadow-indigo-500/10"
+        className="px-8 py-2 rounded-md bg-[#a9afb5] 
+        flex flex-row items-center justify-center 
+        border border-[#1e2124] 
+        hover:border hover:border-indigo-600 
+        shadow-md shadow-indigo-500/10"
         onClick={handleClick}
       >
         {/* Display the MetaMask Fox image */}
-        <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" alt="MetaMask Fox" width={25} height={25} />
+        <img src="MetaMask_Fox.svg" alt="MetaMask Fox" width={25} height={25} />
         <h1 className="mx-auto">Connect Wallet</h1>
       </button>
        {/* Render the Status component with the address and balance */}
