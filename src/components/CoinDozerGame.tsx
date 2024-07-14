@@ -10,6 +10,7 @@ import {
 } from './coin';
 //import WalletButton from './viem/WalletButton';
 import WalletButton from './wallet/WalletButton';
+import NearWalletButton from './wallet/NearWalletButton';
 import BackgroundMusic from './scene/BackgroundMusic';
 
 const COIN_POOL_SIZE = 150;
@@ -208,12 +209,7 @@ const MainContent: React.FC<{
         </div>
         <BackgroundMusic src="background.mp3" />
         <WalletButton />
-        <button className="h-full py-5 px-2
-        border border-black rounded-lg bg-white/50
-        flex items-center justify-center
-        ">
-          NEAR AA
-        </button>
+        <NearWalletButton/>
       </nav>
       
       <BackgroundVideo />
