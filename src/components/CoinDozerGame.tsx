@@ -209,7 +209,7 @@ const MainContent: React.FC<{
         <BackgroundMusic src="background.mp3" />
         <WalletButton />
         <button className="h-full py-5 px-2
-        border rounded-lg bg-white/50
+        border border-black rounded-lg bg-white/50
         flex items-center justify-center
         ">
           NEAR AA
