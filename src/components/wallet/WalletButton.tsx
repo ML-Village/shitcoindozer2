@@ -16,7 +16,7 @@ const WalletButton = () => {
         onClick={() => isConnected ? disconnect() : connect({ connector: injected() })}
         >
             {isConnected ? 
-                addressShortener(address) as `0x${string}` : 
+                addressShortener(address??"") as `0x${string}` : 
             
             <span className="flex items-center justify-between space-x-2">
                 <img src="MetaMask_Fox.svg" alt="MetaMask Fox" width={25} height={25} />
