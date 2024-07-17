@@ -1,30 +1,23 @@
-# React + TypeScript + Vite
+# ShitCoin / Meme Coin dozer for Eth Brussels Hackathon 2024
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the Front End Repo for Eth Brussels Hackathon 2024 Meme Coin Dozer.
 
-Currently, two official plugins are available:
+The Smart Contracts Repo can be found here: [Meme Coin Dozer Contracts](https://github.com/ML-Village/dozer-contracts) 
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+The ZKML API code can be found here: [ZKML Repo for Meme Coin Dozer](https://github.com/ML-Village/dozer-zkml)
 
-## Expanding the ESLint configuration
+We have deployed contracts to the following chains (testnets/sepolias) without problems (most of them with Scanner verification)  
+(Some of the addresses may look the same as they are deployed with the same nounces)
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+**Deployed Addresses (Game)**
+Base : 0x9d71865290cca388D427807C971fe7f6C364f5B4
+Arbi : 0x254aEC4487b08A53c32De73f234574246f1A0052
+Scroll : 0x9Db954a49B6Bf304ACc4B5D76c723c1cC9C7E073
+Rootstock : 0x9DB954a49b6bf304aCc4B5D76C723C1cC9C7E073
+APE Chain : 0x9Db954a49B6Bf304ACc4B5D76c723c1cC9C7E073
+Zircuit : 0x9Db954a49B6Bf304ACc4B5D76c723c1cC9C7E073
 
-- Configure the top-level `parserOptions` property like this:
+Hope u had some laughs and fun.
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
-
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+![memedozer1](public/memecoindozer.jpg)  
+![memedozer2](public/memecoindozer2.png)
